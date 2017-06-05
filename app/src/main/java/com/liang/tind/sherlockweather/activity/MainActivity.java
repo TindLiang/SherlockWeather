@@ -1,7 +1,6 @@
 package com.liang.tind.sherlockweather.activity;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.liang.tind.sherlockweather.R;
@@ -25,7 +24,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 import static com.liang.tind.sherlockweather.http.RetrofitClient.baseUrl;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
     private static final String TAG = "MainActivity";
     private ApiServices mApiServices;
 
@@ -33,12 +32,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        findViewById(R.id.all).setOnClickListener(view -> handle());
 
         initWeatherService(ApiServices.KNOW_WEATHER_API_HOST);
 //       test();
     }
 
+    private void handle(){
+
+    }
     private void initWeatherService(String baseUrl) {
 
         RetrofitClient.getInstance(this).createBaseApi().getWeather("101010100", new Observer<KnowWeather>() {

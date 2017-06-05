@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.liang.tind.sherlockweather.activity.BaseActivity;
 import com.liang.tind.sherlockweather.module.entity.KnowWeather;
 
 import org.reactivestreams.Subscriber;
@@ -49,7 +50,6 @@ public class RetrofitClient {
     private static Retrofit retrofit;
     private Cache cache = null;
     private File httpCacheDirectory;
-
 
 
     private static Retrofit.Builder builder =
@@ -111,7 +111,7 @@ public class RetrofitClient {
             url = baseUrl;
         }
 
-        if ( httpCacheDirectory == null) {
+        if (httpCacheDirectory == null) {
             httpCacheDirectory = new File(mContext.getCacheDir(), "sherlock_weather_cache");
         }
 
@@ -157,7 +157,7 @@ public class RetrofitClient {
     }
 
     /**
-     *addcookieJar
+     * addcookieJar
      */
     public static void addCookie() {
         okHttpClient.newBuilder().cookieJar(new NovateCookieManger(mContext)).build();
@@ -177,21 +177,24 @@ public class RetrofitClient {
 
     /**
      * create BaseApi  defalte ApiManager
+     *
      * @return ApiManager
      */
     public RetrofitClient createBaseApi() {
         apiService = create(ApiServices.class);
-        Log.e(TAG, "createBaseApi: apiService=="+apiService );
+        Log.e(TAG, "createBaseApi: apiService==" + apiService);
         return this;
     }
-    public ApiServices getApiService(){
-        return  apiService;
+
+    public ApiServices getApiService() {
+        return apiService;
     }
+
     /**
      * create you ApiService
      * Create an implementation of the API endpoints defined by the {@code service} interface.
      */
-    public  <T> T create(final Class<T> service) {
+    public <T> T create(final Class<T> service) {
         if (service == null) {
             throw new RuntimeException("Api service is null!");
         }
@@ -199,10 +202,9 @@ public class RetrofitClient {
     }
 
 
-
     public void get(String url, Map parameters, Observer subscriber) {
 
-         apiService.executeGet(url, parameters)
+        apiService.executeGet(url, parameters)
                 .compose(schedulersTransformer())
                 .compose(transformer())
                 .subscribe(subscriber);
@@ -215,18 +217,20 @@ public class RetrofitClient {
                 .subscribe(subscriber);
     }
 
-    public void json(String url, RequestBody jsonStr,Observer<IpResult> subscriber) {
+    public void json(String url, RequestBody jsonStr, Observer<IpResult> subscriber) {
 
-         apiService.json(url, jsonStr)
+        apiService.json(url, jsonStr)
                 .compose(schedulersTransformer())
                 .compose(transformer())
                 .subscribe(subscriber);
 
     }
+
     public void getWeather(String cityId, Observer<KnowWeather> subscriber) {
 
         apiService.getKnowWeather(cityId)
                 .compose(schedulersTransformer())
+                .compose(((BaseActivity) mContext).bindToLifecycle())
 //                .compose(transformer())
                 .subscribe(subscriber);
 
@@ -289,7 +293,8 @@ public class RetrofitClient {
 
         @Override
         public T apply(@NonNull BaseResponse<T> tBaseResponse) throws Exception {
-            if (!tBaseResponse.isOk()) throw new RuntimeException(tBaseResponse.getCode() + "" + tBaseResponse.getMsg() != null ? tBaseResponse.getMsg(): "");
+            if (!tBaseResponse.isOk())
+                throw new RuntimeException(tBaseResponse.getCode() + "" + tBaseResponse.getMsg() != null ? tBaseResponse.getMsg() : "");
             return tBaseResponse.getData();
         }
     }
@@ -299,15 +304,15 @@ public class RetrofitClient {
      * /**
      * execute your customer API
      * For example:
-     *  MyApiService service =
-     *      RetrofitClient.getInstance(MainActivity.this).create(MyApiService.class);
-     *
-     *  RetrofitClient.getInstance(MainActivity.this)
-     *      .execute(service.lgon("name", "password"), subscriber)
-     *     * @param subscriber
+     * MyApiService service =
+     * RetrofitClient.getInstance(MainActivity.this).create(MyApiService.class);
+     * <p>
+     * RetrofitClient.getInstance(MainActivity.this)
+     * .execute(service.lgon("name", "password"), subscriber)
+     * * @param subscriber
      */
 
-    public static <T> T execute(Observable<T> observable ,Observer<T> subscriber) {
+    public static <T> T execute(Observable<T> observable, Observer<T> subscriber) {
         observable.subscribeOn(Schedulers.io())
                 .unsubscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -319,6 +324,7 @@ public class RetrofitClient {
 
     /**
      * DownSubscriber
+     *
      * @param <ResponseBody>
      */
     class DownSubscriber<ResponseBody> implements Subscriber<ResponseBody> {
@@ -327,7 +333,6 @@ public class RetrofitClient {
         public DownSubscriber(CallBack callBack) {
             this.callBack = callBack;
         }
-
 
 
         @Override
